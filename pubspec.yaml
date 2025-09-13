@@ -30,7 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  lottie: ^3.1.2   # check pub.dev for latest version
+  lottie: ^3.1.2 
+  http: ^1.1.0  # check pub.dev for latest version
 
 
 
@@ -58,6 +59,7 @@ flutter:
     - assets/logo.png
     - assets/cat.json
     - assets/scratch.json
+    - assets/rainbow.json
 
 
   # The following line ensures that the Material Icons font is
