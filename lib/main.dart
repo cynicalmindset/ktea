@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ktea/onboard.dart';
 import 'package:ktea/splash.dart';
 import 'package:ktea/terms.dart';
+import 'package:ktea/terms2.dart';
+import 'package:ktea/terms3.dart';
 
 
 void main(){
@@ -9,6 +12,10 @@ void main(){
     routes:{
       '/':(context)=>Splash(),
       '/terms':(context)=>Terms(),
+      '/terms2': (context) => const Terms2(),
+      '/terms3': (context) => const Terms3(),
+      '/onboard':(context)=>const LoginPage(),
+       
     }
   ));
 }

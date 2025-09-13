@@ -57,6 +57,7 @@ flutter:
   assets:
     - assets/logo.png
     - assets/cat.json
+    - assets/scratch.json
 
 
   # The following line ensures that the Material Icons font is
