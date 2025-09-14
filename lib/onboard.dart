@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ktea/api_service.dart';
+import 'package:ktea/storage.dart';
 import 'package:lottie/lottie.dart';
 
 class LoginPage extends StatefulWidget {
@@ -123,12 +124,33 @@ class _LoginPageState extends State<LoginPage> {
                                       password.text,
                                     );
                                     print("✅ Login Success: $res");
+                                    String userId;
+                                      if (res['_id'] is Map && res['_id'].containsKey('\$oid')) {
+                                        userId = res['_id']['\$oid'];
+                                      } else if (res['_id'] is String) {
+                                        userId = res['_id'];
+                                      } else {
+                                        userId = res['_id'].toString();
+                                      }
+                                     await saveLoginData(userId, res['username']);
+                                  
+                               
 
                                     Navigator.pushReplacementNamed(context, "/home");
                                   } else {
                                     // REGISTER FLOW
                                     final res = await ApiService.registerUser();
                                     print("✅ Register Success: $res");
+                                    String userId;
+    if (res['_id'] is Map && res['_id'].containsKey('\$oid')) {
+      userId = res['_id']['\$oid'];
+    } else if (res['_id'] is String) {
+      userId = res['_id'];
+    } else {
+      userId = res['_id'].toString();
+    }
+                                     await saveLoginData(userId, res['username']);
+
 
                                     // Show dialog with credentials
                                     showDialog(
