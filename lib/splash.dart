@@ -19,25 +19,12 @@ class _splashState extends State<Splash> {
   void initState(){
     super.initState();
     startTimer();
-    checkLogin();
+    
   }
 
 
 
-   Future<void> checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token != null) {
-      // User is logged in → Go to Home
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Home()));
-    } else {
-      // User not logged in → Go to Login
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => LoginPage()));
-    }
-  }
+  
 
   startTimer(){
     var duration = Duration(seconds: 6);

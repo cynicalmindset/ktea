@@ -17,7 +17,7 @@ void main(){
       '/terms2': (context) => const Terms2(),
       '/terms3': (context) => const Terms3(),
       '/onboard':(context)=>const LoginPage(),
-      '/home':(context)=>const Home(),
+      '/home':(context)=> MainScreen(),
       //'/uploadpostpage':(context)=> UploadPostPage()
        
     }
