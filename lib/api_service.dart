@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   static const String baseUrl = "https://kitea-production.up.railway.app/api";
@@ -12,7 +14,23 @@ class ApiService {
   // ========================================================
   // AUTH ENDPOINTS
   // ========================================================
-
+ static MediaType _getMediaType(File file) {
+    String extension = file.path.toLowerCase().split('.').last;
+    
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return MediaType('image', 'jpeg');
+      case 'png':
+        return MediaType('image', 'png');
+      case 'gif':
+        return MediaType('image', 'gif');
+      case 'webp':
+        return MediaType('image', 'webp');
+      default:
+        return MediaType('image', 'jpeg'); // Default fallback
+    }
+  }
   /// 🟢 Register/Create a new user
   static Future<Map<String, dynamic>> registerUser() async {
     try {
@@ -70,61 +88,135 @@ class ApiService {
   // ========================================================
 
   /// 🟢 Create a new post
-   static Future<Map<String, dynamic>> createPost({
+ static Future<Map<String, dynamic>> createPost({
     required File photo,
     required String personName,
     required String caption,
     required String userId,
   }) async {
     try {
-      var request =
-          http.MultipartRequest("POST", Uri.parse("$baseUrl/posts/create"));
+      print("🚀 Starting createPost...");
+      print("📸 Photo path: ${photo.path}");
+      print("👤 Person: $personName");
+      print("📝 Caption: $caption");
+      print("🆔 User ID: $userId");
 
-      // Attach photo file
-      request.files.add(await http.MultipartFile.fromPath("photo", photo.path));
-
-      // Add other fields
-      request.fields["personName"] = personName;
-      request.fields["caption"] = caption;
-      request.fields["userId"] = userId;
-
-      // Send request
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      print("Create Post Status: ${response.statusCode}");
-      print("Create Post Body: ${response.body}");
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Failed to create post: ${response.body}");
+      // Validate file exists and is readable
+      if (!await photo.exists()) {
+        throw Exception("Image file does not exist");
       }
+
+      final fileSize = await photo.length();
+      print("📏 File size: ${fileSize} bytes (${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB)");
+
+      if (fileSize > 50 * 1024 * 1024) { // 50MB limit
+        throw Exception("Image file too large. Maximum size is 50MB");
+      }
+
+      // Create multipart request
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/posts/create'));
+      
+      print("🌐 Request URL: $baseUrl/posts/create");
+
+      // Add text fields
+      request.fields['personName'] = personName;
+      request.fields['caption'] = caption;
+      request.fields['userId'] = userId;
+
+      print("📝 Added fields: ${request.fields}");
+
+      // Add image file with correct MIME type
+      MediaType mediaType = _getMediaType(photo);
+      print("🖼 Media type: ${mediaType.mimeType}");
+
+      var multipartFile = await http.MultipartFile.fromPath(
+        'photo',
+        photo.path,
+        contentType: mediaType,
+      );
+
+      request.files.add(multipartFile);
+      print("✅ Added photo file");
+
+      // Send request with longer timeout and progress tracking
+      print("📡 Sending request...");
+      
+      http.StreamedResponse streamedResponse;
+      try {
+        streamedResponse = await request.send().timeout(
+          const Duration(minutes: 5), // Increased to 5 minutes
+          onTimeout: () {
+            print("⏰ Request timed out after 5 minutes");
+            throw Exception("Request timed out. Please check your internet connection and try again.");
+          },
+        );
+      } catch (e) {
+        print("🚨 Network error during request: $e");
+        throw Exception("Network error: ${e.toString()}");
+      }
+
+      print("📨 Response received - Status: ${streamedResponse.statusCode}");
+      
+      // Read response
+      final response = await http.Response.fromStream(streamedResponse);
+      print("📄 Response body length: ${response.body.length}");
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("✅ Success response");
+        try {
+          final Map<String, dynamic> jsonResponse = json.decode(response.body);
+          print("🎉 Post created successfully!");
+          return jsonResponse;
+        } catch (e) {
+          print("❌ JSON parsing error: $e");
+          print("📄 Raw response: ${response.body}");
+          throw Exception("Failed to parse server response");
+        }
+      } else {
+        print("❌ Server error - Status: ${response.statusCode}");
+        print("📄 Error response: ${response.body}");
+        
+        // Try to parse error response
+        try {
+          final errorData = json.decode(response.body);
+          throw Exception("Server error: ${errorData['message'] ?? 'Unknown error'}");
+        } catch (_) {
+          throw Exception("Server error (${response.statusCode}): ${response.body}");
+        }
+      }
+
+    } on SocketException catch (e) {
+      print("🌐 Network connectivity error: $e");
+      throw Exception("No internet connection. Please check your network and try again.");
+    } on TimeoutException catch (e) {
+      print("⏰ Timeout error: $e");
+      throw Exception("Request timed out. Please try again with a smaller image or check your internet connection.");
+    } on FormatException catch (e) {
+      print("📄 JSON format error: $e");
+      throw Exception("Invalid server response format");
     } catch (e) {
-      print("Create Post Exception: $e");
-      rethrow;
+      print("❌ Unexpected error: $e");
+      throw Exception("Failed to create post: ${e.toString()}");
     }
   }
 
-  /// 🟢 Get all posts
-  static Future<List<dynamic>> getAllPosts() async {
+  /// Test server connectivity
+  static Future<bool> testConnectivity() async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/posts"));
-
-      print("Get Posts Status: ${response.statusCode}");
-      print("Get Posts Body: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
-        return res.containsKey("data") ? res["data"] : res;
-      } else {
-        throw Exception("Failed to fetch posts: ${response.body}");
-      }
+      print("🔍 Testing server connectivity...");
+      final response = await http.get(
+        Uri.parse('$baseUrl/health'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 10));
+      
+      print("🌐 Connectivity test - Status: ${response.statusCode}");
+      return response.statusCode == 200;
     } catch (e) {
-      print("Get Posts Exception: $e");
-      rethrow;
+      print("❌ Connectivity test failed: $e");
+      return false;
     }
   }
+
 
   /// 🟢 Delete a post
   static Future<Map<String, dynamic>> deletePost(String postId) async {
@@ -307,4 +399,29 @@ class ApiService {
       rethrow;
     }
   }
+
+  /// Get all posts
+static Future<List<dynamic>> getAllPosts() async {
+  try {
+    final response = await http.get(
+      Uri.parse("$baseUrl/posts"),
+      headers: _headers,
+    );
+
+    print("Get All Posts Status: ${response.statusCode}");
+    print("Get All Posts Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final res = jsonDecode(response.body);
+      return res.containsKey("data") ? res["data"] : res;
+    } else {
+      throw Exception("Failed to fetch posts: ${response.body}");
+    }
+  } catch (e) {
+    print("Get All Posts Exception: $e");
+    rethrow;
+  }
+}
+
+
 }

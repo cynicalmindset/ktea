@@ -19,63 +19,86 @@ class _AddPostPageState extends State<AddPostPage> {
 
   final ImagePicker _picker = ImagePicker();
 
+  /// Pick image from gallery
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+        print("🖼 Image selected: ${pickedFile.path}");
+      } else {
+        print("⚠️ No image selected");
+      }
+    } catch (e) {
+      print("❌ Error picking image: $e");
     }
   }
 
-  Future<void> _submitPost() async {
-    final personName = _personNameController.text.trim();
-    final caption = _captionController.text.trim();
+  /// Submit post to backend
+ /// Submit post to backend - FIXED VERSION
+Future<void> _submitPost() async {
+  final personName = _personNameController.text.trim();
+  final caption = _captionController.text.trim();
 
-    if (personName.isEmpty || caption.isEmpty || _selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields and pick an image")),
-      );
-      return;
+  if (personName.isEmpty || caption.isEmpty || _selectedImage == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please fill all fields and select an image")),
+    );
+    return;
+  }
+
+  // Check image size before uploading
+  final fileSize = await _selectedImage!.length();
+  final fileSizeMB = fileSize / 1024 / 1024;
+  print("Image size: ${fileSizeMB.toStringAsFixed(2)} MB");
+
+  if (fileSizeMB > 10) { // 10MB limit
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Image too large! Please select an image smaller than 10MB")),
+    );
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    final userId = await getuserid();
+    if (userId == null) {
+      throw Exception("User not logged in");
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    final result = await ApiService.createPost(
+      photo: _selectedImage!,
+      personName: personName,
+      caption: caption,
+      userId: userId,
+    );
 
-    try {
-      // ✅ Get userId from storage
-      final userId = await getuserid();
-
-      if (userId == null) {
-        throw Exception("User not logged in");
-      }
-
-      final res = await ApiService.createPost(
-          photo: _selectedImage!,
-          personName: personName,
-          caption: caption,
-          userId: userId,
-        );
-
-      print("✅ Post created: $res");
-
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Post created successfully!")),
       );
-
-      Navigator.pop(context); // Go back to Home
-    } catch (e) {
-      print("❌ Post creation failed: $e");
+      Navigator.pop(context);
+    }
+  } catch (e) {
+    print("❌ Error creating post: $e");
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text("Failed to create post: ${e.toString()}")),
       );
-    } finally {
+    }
+  } finally {
+    if (mounted) {
       setState(() {
         _isLoading = false;
       });
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
