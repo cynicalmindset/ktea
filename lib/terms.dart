@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ktea/home.dart';
+import 'package:ktea/register_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Terms extends StatefulWidget {
@@ -21,20 +22,25 @@ class _termsState extends State<Terms> {
     
   }
 
- Future<void> checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+Future<void> checkLogin() async {
+  final prefs = await SharedPreferences.getInstance();
+  final userId = prefs.getString('userId'); // check userId instead of token
 
-    if (token != null) {
-      // User is logged in → Go to Home
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => MainScreen()));
-    } else {
-      // User not logged in → Go to Login
-      // Navigator.pushReplacement(
-      //     context, MaterialPageRoute(builder: (_) => Terms()));
-    }
+  if (userId != null) {
+    // User is logged in → Go to Home
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => Home()),
+    );
+  } else {
+    // User not logged in → Go to Login (or Terms)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginPage()),
+    );
   }
+}
+
 
 
 

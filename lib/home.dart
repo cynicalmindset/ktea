@@ -1,43 +1,28 @@
 import 'package:flutter/material.dart';
-import 'custom_toggle_appbar.dart';
-import 'home_page.dart';
-import 'profilepage.dart';
-import 'chat_page.dart';
-import 'settings_page.dart';
 
-class MainScreen extends StatefulWidget {
+class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<Home> createState() => _HomeState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int currentTab = 0;
-
-  final List<Widget> pages = [
-    HomePage(),
-    ProfilePage(),
-    ChatPage(),
-  ];
-
+class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: CustomToggleAppBar(
-        initialIndex: currentTab,
-        onTabChanged: (index) {
-          setState(() {
-            currentTab = index;
-          });
+      backgroundColor: Colors.grey[850],
+      appBar: AppBar(title: const Text("Home")),
+
+      
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          
+          Navigator.pushNamed(context, "/Addpost");
         },
-        onSettingsPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SettingsPage()),
-          );
-        },
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.add, size: 28, color: Colors.black),
       ),
-      body: pages[currentTab],
     );
   }
 }
