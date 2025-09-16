@@ -30,7 +30,7 @@ Future<void> checkLogin() async {
     // User is logged in → Go to Home
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => Home()),
+      MaterialPageRoute(builder: (_) => HomePage()),
     );
   } else {
     // User not logged in → Go to Login (or Terms)

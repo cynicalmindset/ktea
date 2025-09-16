@@ -243,50 +243,56 @@ class ApiService {
 
   /// 🟢 Create a comment
   static Future<Map<String, dynamic>> createComment(
-      String postId, String userId, String text) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/comments/create"),
-        headers: _headers,
-        body: jsonEncode({
-          "postId": postId,
-          "userId": userId,
-          "text": text,
-        }),
-      );
+    String postId, String userId, String content) async {
+  try {
+    final response = await http.post(
+      Uri.parse("$baseUrl/comments/create"),
+      headers: _headers,
+      body: jsonEncode({
+        "postId": postId,
+        "userId": userId,
+        "content": content, // <-- change here from "text" to "content"
+      }),
+    );
 
-      print("Create Comment Status: ${response.statusCode}");
-      print("Create Comment Body: ${response.body}");
+    print("Create Comment Status: ${response.statusCode}");
+    print("Create Comment Body: ${response.body}");
 
-      return jsonDecode(response.body);
-    } catch (e) {
-      print("Create Comment Exception: $e");
-      rethrow;
-    }
+    return jsonDecode(response.body);
+  } catch (e) {
+    print("Create Comment Exception: $e");
+    rethrow;
   }
+}
+
 
   /// 🟢 Get comments for a post
   static Future<List<dynamic>> getComments(String postId) async {
-    try {
-      final response = await http.get(
-        Uri.parse("$baseUrl/comments/post/$postId"),
-        headers: _headers,
-      );
+  try {
+    final response = await http.get(
+      Uri.parse("$baseUrl/comments/post/$postId"),
+      headers: _headers,
+    );
 
-      print("Get Comments Status: ${response.statusCode}");
-      print("Get Comments Body: ${response.body}");
+    print("Get Comments Status: ${response.statusCode}");
+    print("Get Comments Body: ${response.body}");
 
-      if (response.statusCode == 200) {
-        final res = jsonDecode(response.body);
-        return res.containsKey("data") ? res["data"] : res;
-      } else {
-        throw Exception("Failed to fetch comments: ${response.body}");
+    if (response.statusCode == 200) {
+      final res = jsonDecode(response.body);
+      if (res.containsKey("data") && res["data"] is Map && res["data"].containsKey("comments")) {
+        return res["data"]["comments"] as List<dynamic>;
       }
-    } catch (e) {
-      print("Get Comments Exception: $e");
-      rethrow;
+      // Fallback if comments key not found, return empty list or res["data"] itself
+      return [];
+    } else {
+      throw Exception("Failed to fetch comments: ${response.body}");
     }
+  } catch (e) {
+    print("Get Comments Exception: $e");
+    rethrow;
   }
+}
+
 
   /// 🟢 Vote on a comment
   static Future<Map<String, dynamic>> voteOnComment(
@@ -401,27 +407,37 @@ class ApiService {
   }
 
   /// Get all posts
-static Future<List<dynamic>> getAllPosts() async {
+// In ApiService
+static Future<List<Map<String, dynamic>>> getPosts({int limit = 5, int skip = 0}) async {
   try {
-    final response = await http.get(
-      Uri.parse("$baseUrl/posts"),
-      headers: _headers,
-    );
-
-    print("Get All Posts Status: ${response.statusCode}");
-    print("Get All Posts Body: ${response.body}");
+    final response = await http.get(Uri.parse("$baseUrl/posts?limit=$limit&skip=$skip"));
+    print("Get Posts Status: ${response.statusCode}");
+    print("Get Posts Body: ${response.body}");
 
     if (response.statusCode == 200) {
       final res = jsonDecode(response.body);
-      return res.containsKey("data") ? res["data"] : res;
+      final List<dynamic> postsData = res['data']; // list of posts
+
+      return postsData.map<Map<String, dynamic>>((post) {
+        return {
+          "postId": post['postId'] ?? post['_id'],
+          "personName": post['personName'],
+          "caption": post['caption'],
+          "photoUrl": post['photo']['url'],
+          "uploadedBy": post['uploadedBy'],
+          "votes": post['votes'],
+          "createdAt": post['createdAt'],
+        };
+      }).toList();
     } else {
-      throw Exception("Failed to fetch posts: ${response.body}");
+      throw Exception("Failed to fetch posts");
     }
   } catch (e) {
-    print("Get All Posts Exception: $e");
+    print("Get Posts Exception: $e");
     rethrow;
   }
 }
+
 
 
 }

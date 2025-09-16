@@ -595,7 +595,7 @@
 //     });
 
 //     try {
-//       final fetchedPosts = await ApiService.getAllPosts();
+//       final fetchedPosts = await ApiService.getPosts();
 //       setState(() {
 //         posts = fetchedPosts.map((data) => SafePost.fromJson(data)).where((p) => p.isActive).toList();
 //         isLoading = false;
