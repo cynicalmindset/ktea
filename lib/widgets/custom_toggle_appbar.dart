@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 class CustomToggleAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Function(int)? onTabChanged;
   final int initialIndex;
+  final VoidCallback? onSettingsPressed;
 
   const CustomToggleAppBar({
     super.key,
     this.onTabChanged,
     this.initialIndex = 0, 
-    required Null Function() onSettingsPressed,
+    this.onSettingsPressed,
   });
 
   @override
@@ -151,7 +152,7 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: IconButton(
-        onPressed: () {
+        onPressed: widget.onSettingsPressed ?? () {
           // Handle settings action
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Settings pressed')),

@@ -7,6 +7,7 @@ import 'package:ktea/splash.dart';
 import 'package:ktea/terms.dart';
 import 'package:ktea/terms2.dart';
 import 'package:ktea/terms3.dart';
+import 'package:ktea/userpage.dart';
 //import 'package:ktea/upload_post_page.dart';
 
 
@@ -20,7 +21,10 @@ void main(){
       '/terms3': (context) => const Terms3(),
       '/onboard':(context)=>const LoginPage(),
       '/home':(context)=> HomePage(),
+      '/Profile':(context)=> UserProfilePage(),
       '/Addpost':(context)=>AddPostPage(),
+      
+
       //'/uploadpostpage':(context)=> UploadPostPage()
        
     }

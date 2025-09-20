@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'api_service.dart';
-import 'storage.dart'; 
+import 'package:ktea/api_service.dart';
+import 'package:ktea/storage.dart';
 
-
+/// 🔹 Add Post Page - Dark Mode Design
 class AddPostPage extends StatefulWidget {
   const AddPostPage({super.key});
 
@@ -17,14 +17,14 @@ class _AddPostPageState extends State<AddPostPage> {
   final TextEditingController _captionController = TextEditingController();
   File? _selectedImage;
   bool _isLoading = false;
+  final ImagePicker _picker = ImagePicker();
 
+  @override
   void dispose() {
     _personNameController.dispose();
     _captionController.dispose();
     super.dispose();
   }
-
-  final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
     try {
@@ -33,12 +33,20 @@ class _AddPostPageState extends State<AddPostPage> {
         setState(() {
           _selectedImage = File(pickedFile.path);
         });
-        print("🖼 Image selected: ${pickedFile.path}");
+        print("Image selected: ${pickedFile.path}");
       } else {
-        print("⚠️ No image selected");
+        print("No image selected");
       }
     } catch (e) {
-      print("❌ Error picking image: $e");
+      print("Error picking image: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Error selecting image. Please try again."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -48,7 +56,10 @@ class _AddPostPageState extends State<AddPostPage> {
 
     if (personName.isEmpty || caption.isEmpty || _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields and select an image")),
+        const SnackBar(
+          content: Text("Please fill all fields and select an image"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -59,14 +70,15 @@ class _AddPostPageState extends State<AddPostPage> {
 
     if (fileSizeMB > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Image too large! Please select an image smaller than 10MB")),
+        const SnackBar(
+          content: Text("Image too large! Please select an image smaller than 10MB"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final userId = await getuserid();
@@ -83,138 +95,254 @@ class _AddPostPageState extends State<AddPostPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Post created successfully!")),
+          const SnackBar(
+            content: Text("Post created successfully!"),
+            backgroundColor: Colors.green,
+          ),
         );
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Return true to indicate success
       }
     } catch (e) {
-      print("❌ Error creating post: $e");
+      print("Error creating post: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to create post: ${e.toString()}")),
+          SnackBar(
+            content: Text("Failed to create post: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Post")),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Person Name",
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text(
+          "Add New Post",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.grey[900],
+        //iconTheme: const IconTheme(color: Colors.white),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Person Name Section
+            const Text(
+              "Person Name",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 8),
-              TextField(
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[850],
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
                 controller: _personNameController,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: "Enter person name",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  hintText: "Enter person's name",
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                "Caption",
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Caption Section
+            const Text(
+              "Caption",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 8),
-              TextField(
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[850],
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
                 controller: _captionController,
-                maxLines: 3,
+                maxLines: 4,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: "Write a caption...",
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  hintText: "Write a caption about this person...",
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                "Selected Image",
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Image Section
+            const Text(
+              "Photo",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 12),
-              Center(
-                child: _selectedImage != null
-                    ? Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image.file(
-                          _selectedImage!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Container(
-                        height: 180,
+            ),
+            const SizedBox(height: 12),
+
+            // Image Preview Container
+            Container(
+              width: double.infinity,
+              height: 250,
+              decoration: BoxDecoration(
+                color: Colors.grey[850],
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _selectedImage != null ? Colors.blueAccent : Colors.grey[600]!,
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: _selectedImage != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.cover,
                         width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          "No image selected",
-                          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                        ),
+                        height: double.infinity,
                       ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image),
-                  label: const Text("Pick Image"),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.photo_camera_outlined,
+                          size: 48,
+                          color: Colors.grey[500],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "No image selected",
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Tap below to add a photo",
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Pick Image Button
+            Container(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.photo_library_outlined, color: Colors.white),
+                label: Text(
+                  _selectedImage != null ? "Change Photo" : "Select Photo",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[700],
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 4,
+                ),
               ),
-              const SizedBox(height: 40),
-              Center(
+            ),
+
+            const SizedBox(height: 40),
+
+            // Submit Button
+            Container(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submitPost,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  disabledBackgroundColor: Colors.grey[600],
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 6,
+                ),
                 child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _submitPost,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Text(
-                              "Submit Post",
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          ),
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        "Create Post",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );

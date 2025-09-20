@@ -219,23 +219,29 @@ class ApiService {
 
 
   /// 🟢 Delete a post
-  static Future<Map<String, dynamic>> deletePost(String postId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse("$baseUrl/posts/delete"),
-        headers: _headers,
-        body: jsonEncode({"postId": postId}),
-      );
 
-      print("Delete Post Status: ${response.statusCode}");
-      print("Delete Post Body: ${response.body}");
+static Future<Map<String, dynamic>> deletePost({
+  required String postId,
+  required String userId,
+}) async {
+  final url = Uri.parse('$baseUrl/posts/delete/');
 
-      return jsonDecode(response.body);
-    } catch (e) {
-      print("Delete Post Exception: $e");
-      rethrow;
-    }
-  }
+  final response = await http.delete(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      ..._headers, // any auth headers
+    },
+    body: jsonEncode({'userId': userId}),
+  );
+
+  print("Delete Post Status: ${response.statusCode}");
+  print("Delete Post Body: ${response.body}");
+
+  return jsonDecode(response.body);
+}
+
+
 
   // ========================================================
   // COMMENT ENDPOINTS
@@ -295,28 +301,42 @@ class ApiService {
 
 
   /// 🟢 Vote on a comment
-  static Future<Map<String, dynamic>> voteOnComment(
-      String commentId, String userId, int vote) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/comments/vote"),
-        headers: _headers,
-        body: jsonEncode({
-          "commentId": commentId,
-          "userId": userId,
-          "vote": vote, // 1 = upvote, -1 = downvote
-        }),
-      );
+ /// 🟢 Vote on a comment - FIXED VERSION
+static Future<Map<String, dynamic>> voteOnComment(
+    String commentId, String userId, int vote) async {
+  try {
+    print("=== API VOTE REQUEST ===");
+    print("Comment ID: $commentId");
+    print("User ID: $userId"); 
+    print("Vote: $vote");
+    
+    // Convert integer vote to string format expected by API
+    String voteType = vote == 1 ? "upvote" : "downvote";
+    print("Converted voteType: $voteType");
+    
+    final response = await http.post(
+      Uri.parse("$baseUrl/comments/vote"),
+      headers: _headers,
+      body: jsonEncode({
+        "commentId": commentId,
+        "userId": userId,
+        "voteType": voteType, // Now using string values "upvote" or "downvote"
+      }),
+    );
 
-      print("Vote Comment Status: ${response.statusCode}");
-      print("Vote Comment Body: ${response.body}");
+    print("Vote Comment Status: ${response.statusCode}");
+    print("Vote Comment Body: ${response.body}");
 
+    if (response.statusCode == 200) {
       return jsonDecode(response.body);
-    } catch (e) {
-      print("Vote Comment Exception: $e");
-      rethrow;
+    } else {
+      throw Exception("API Error ${response.statusCode}: ${response.body}");
     }
+  } catch (e) {
+    print("Vote Comment Exception: $e");
+    rethrow;
   }
+}
 
   /// 🟢 Delete a comment
   static Future<Map<String, dynamic>> deleteComment(String commentId) async {
@@ -342,16 +362,22 @@ class ApiService {
   // ========================================================
 
   /// 🟢 Flag a person (red/green flag)
-  static Future<Map<String, dynamic>> flagPerson(
-      String postId, String userId, String flagType) async {
+ 
+  static Future<Map<String, dynamic>> flagPerson({
+    required String postId,
+    required String voteType, // "redFlag" or "greenFlag"
+    required String userId,
+  }) async {
     try {
+      final url = Uri.parse('$baseUrl/votes/post');
+
       final response = await http.post(
-        Uri.parse("$baseUrl/votes/post"),
-        headers: _headers,
+        url,
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "postId": postId,
+          "voteType": voteType,
           "userId": userId,
-          "flagType": flagType, // e.g., "red" or "green"
         }),
       );
 
@@ -382,6 +408,8 @@ class ApiService {
       rethrow;
     }
   }
+
+
 
   /// 🟢 Get safest people
   static Future<List<dynamic>> getSafestPeople() async {
@@ -435,6 +463,58 @@ static Future<List<Map<String, dynamic>>> getPosts({int limit = 5, int skip = 0}
   } catch (e) {
     print("Get Posts Exception: $e");
     rethrow;
+  }
+}
+
+
+ /// 🟢 Get posts of a specific user
+static Future<List<Map<String, dynamic>>> getUserPosts(String userId) async {
+  try {
+    print("Fetching posts for userId: $userId");
+
+    final url = Uri.parse('$baseUrl/posts/user/$userId');
+    print("Request URL: $url");
+
+    final response = await http.get(url, headers: _headers);
+
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+
+      print("Decoded JSON: $decoded");
+
+      if (decoded.containsKey('data')) {
+        final data = decoded['data'];
+
+        // Check if posts is inside data
+        if (data is Map && data.containsKey('posts')) {
+          final posts = List<Map<String, dynamic>>.from(data['posts']);
+          print("Number of posts received: ${posts.length}");
+          return posts;
+        } 
+        // If data itself is a list
+        else if (data is List) {
+          final posts = List<Map<String, dynamic>>.from(data);
+          print("Number of posts received: ${posts.length}");
+          return posts;
+        } else {
+          print("Warning: 'posts' key not found, returning empty list");
+          return [];
+        }
+      } else {
+        print("Warning: 'data' key not found in response");
+        return [];
+      }
+    } else {
+      print("Error: Status code is not 200");
+      return [];
+    }
+  } catch (e, stacktrace) {
+    print("Exception while fetching user posts: $e");
+    print(stacktrace);
+    return [];
   }
 }
 
