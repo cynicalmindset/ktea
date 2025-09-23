@@ -45,31 +45,27 @@ class _SettingState extends State<Setting> {
 
   // Function to open Instagram
   Future<void> _openInstagram() async {
-    const url = 'https://www.instagram.com/frrryash/?next=%2F'; // Replace with your Instagram URL
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open Instagram')),
-        );
-      }
+  final Uri url = Uri.parse('https://www.instagram.com/frrryash/?next=%2F');
+  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open Instagram')),
+      );
     }
   }
+}
 
-  // Function to open YouTube
-  Future<void> _openYoutube() async {
-    const url = 'https://www.youtube.com/@CoOokedpotato'; // Replace with your YouTube channel URL
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open YouTube')),
-        );
-      }
+Future<void> _openYoutube() async {
+  final Uri url = Uri.parse('https://www.youtube.com/@CoOokedpotato');
+  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open YouTube')),
+      );
     }
   }
+}
+
 
   // Show logout confirmation dialog
   Future<void> _showLogoutDialog() async {
