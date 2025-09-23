@@ -232,7 +232,10 @@ static Future<Map<String, dynamic>> deletePost({
       'Content-Type': 'application/json',
       ..._headers, // any auth headers
     },
-    body: jsonEncode({'userId': userId}),
+    body: jsonEncode({
+  'userId': userId,
+  'postId': postId,  // Add this line
+}),
   );
 
   print("Delete Post Status: ${response.statusCode}");

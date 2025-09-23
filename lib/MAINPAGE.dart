@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ktea/chatpage.dart';
 import 'package:ktea/home.dart';
 import 'package:ktea/userpage.dart';
+import 'package:ktea/setting.dart'; // Add this import
 import 'package:ktea/widgets/custom_toggle_appbar.dart';
-// import 'home_page.dart';
-// import 'profile_page.dart';
-// import 'chat_page.dart';
 
 class MAINPAGE extends StatefulWidget {
   const MAINPAGE({super.key});
@@ -37,9 +35,10 @@ class _MAINPAGEState extends State<MAINPAGE> {
   }
 
   void _onSettingsPressed() {
-    // Example: you can put logout here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Settings pressed!")),
+    // Navigate to Settings page
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Setting()),
     );
   }
 
