@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class Setting extends StatefulWidget {
   const Setting({super.key});
@@ -24,6 +25,8 @@ class _SettingState extends State<Setting> {
             backgroundColor: Colors.green,
           ),
         );
+        await Future.delayed(const Duration(seconds: 2));
+        SystemNavigator.pop(); // Close the app
         
         // Navigate to login page (replace with your login route)
         // Navigator.pushReplacementNamed(context, '/login');

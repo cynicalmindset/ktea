@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                                 } catch (e) {
                                   print("❌ Error: $e");
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text("Error: $e")),
+                                    SnackBar(content: Text("Network bhai")),
                                   );
                                 } finally {
                                   setState(() {

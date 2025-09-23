@@ -103,70 +103,81 @@ class _ExpandableCommentsState extends State<ExpandableComments> {
               if (expanded && comments.isEmpty) _loadComments();
             },
           ),
-          if (expanded) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[700],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _commentController,
-                        focusNode: _commentFocusNode,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          hintText: "Add a gossip...",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                        ),
-                        maxLines: null,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _submitComment(),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+            child: ConstrainedBox(
+              constraints: expanded
+                  ? const BoxConstraints()
+                  : const BoxConstraints(maxHeight: 0),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[700],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _commentController,
+                              focusNode: _commentFocusNode,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: "Add a gossip...",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                              ),
+                              maxLines: null,
+                              textInputAction: TextInputAction.send,
+                              onSubmitted: (_) => _submitComment(),
+                            ),
+                          ),
+                          isSubmittingComment
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.blueAccent,
+                                  ),
+                                )
+                              : IconButton(
+                                  onPressed: _submitComment,
+                                  icon: const Icon(Icons.send, color: Colors.blueAccent),
+                                ),
+                        ],
                       ),
                     ),
-                    isSubmittingComment
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.blueAccent,
-                            ),
-                          )
-                        : IconButton(
-                            onPressed: _submitComment,
-                            icon: const Icon(Icons.send, color: Colors.blueAccent),
-                          ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: isLoadingComments
+                        ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                        : comments.isEmpty
+                            ? const Text(
+                                "Start the gossiping!",
+                                style: TextStyle(color: Colors.grey),
+                              )
+                            : Column(
+                                children: comments.map((comment) {
+                                  return CommentWidget(
+                                    comment: comment,
+                                    currentUserId: widget.currentUserId,
+                                    onVoteUpdate: _loadComments,
+                                  );
+                                }).toList(),
+                              ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: isLoadingComments
-                  ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
-                  : comments.isEmpty
-                      ? const Text(
-                          "No gossips yet. Be the first to comment!",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      : Column(
-                          children: comments.map((comment) {
-                            return CommentWidget(
-                              comment: comment,
-                              currentUserId: widget.currentUserId,
-                              onVoteUpdate: _loadComments,
-                            );
-                          }).toList(),
-                        ),
-            ),
-          ],
+          ),
         ],
       ),
     );

@@ -110,7 +110,7 @@ class _CommentWidgetState extends State<CommentWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to vote: ${e.toString()}'),
+            content: Text('Network error'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

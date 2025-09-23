@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class CustomToggleAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final int initialIndex;
-  final ValueChanged<int>? onTabChanged; // notify parent
+  final int currentIndex; // <-- Change from initialIndex to currentIndex
+  final ValueChanged<int>? onTabChanged;
   final VoidCallback? onSettingsPressed;
 
   const CustomToggleAppBar({
     super.key,
-    this.initialIndex = 0,
+    this.currentIndex = 0,
     this.onTabChanged,
     this.onSettingsPressed,
   });
@@ -31,7 +31,18 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
   @override
   void initState() {
     super.initState();
-    selectedIndex = widget.initialIndex;
+    selectedIndex = widget.currentIndex;
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomToggleAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync selectedIndex with parent on swipe
+    if (selectedIndex != widget.currentIndex) {
+      setState(() {
+        selectedIndex = widget.currentIndex;
+      });
+    }
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -48,7 +59,7 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
   void _changeTab(int index) {
     setState(() => selectedIndex = index);
     if (widget.onTabChanged != null) {
-      widget.onTabChanged!(index); // notify parent
+      widget.onTabChanged!(index);
     }
   }
 

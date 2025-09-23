@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ktea/MAINPAGE.dart';
 import 'package:ktea/api_service.dart';
 import 'package:ktea/storage.dart';
 
@@ -92,15 +94,20 @@ class _LoginPageState extends State<LoginPage> {
                           final userdata = await ApiService.loginUser(username, password);
                           print("party dede bhai: $userdata");
                           await saveLoginData(userdata['_id'], username, password);
-
+                         // SystemNavigator.pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("partyyyy: $userdata"))
                           );
-                          Navigator.pushReplacementNamed(context, '/home');
+                          //Navigator.pushReplacement(context, '/MAIN');
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => MAINPAGE()),
+                            (Route<dynamic> route) => false,
+                           /// SystemNavigator.pop()// Remove all previous routes
+                          );
                         }catch(e){
                           print("what the fuck: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("what the actual fuck: $e")),
+                            SnackBar(content: Text("Network check kr bhai")),
                           );
                         }
                   
@@ -126,18 +133,19 @@ class _LoginPageState extends State<LoginPage> {
                        ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                                   content: Text(
-                                    "areyh party!!\n"
-                                    "username: ${userdata['username']}\n"
-                                    "password: ${userdata['password']}\n"
-                                    "user id: ${userdata['_id']}"
+                                    "Registered: Name: ${userdata['username']} Password: ${userdata['password']}",
+                                    style: TextStyle(fontSize: 16),
                                   ),
                                 ),
                        );
-                       Navigator.pushReplacementNamed(context, '/home');
+                       Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => MAINPAGE()),
+                          (Route<dynamic> route) => false,
+                        );
                         } catch(e){
                           print("areyh bhnchod: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("ajji ni hua ji $e"))
+                            SnackBar(content: Text("Network check kr bc"))
                           );
                         }
                       },

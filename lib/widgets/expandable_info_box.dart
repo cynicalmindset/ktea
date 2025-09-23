@@ -128,15 +128,17 @@ class _ExpandableInfoBoxState extends State<ExpandableInfoBox> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => setState(() => expanded = !expanded),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey[850],
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(expanded ? 24 : 16),
           boxShadow: [
             BoxShadow(
               color: Colors.black45,
-              blurRadius: 6,
+              blurRadius: expanded ? 12 : 6,
               offset: const Offset(0, 3),
             )
           ],
@@ -219,11 +221,20 @@ class _ExpandableInfoBoxState extends State<ExpandableInfoBox> {
               ],
             ),
             const SizedBox(height: 6),
-            Text(
-              widget.caption,
-              style: const TextStyle(fontSize: 15, color: Colors.white),
-              maxLines: expanded ? null : 2,
-              overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            AnimatedSize(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOut,
+              child: ConstrainedBox(
+                constraints: expanded
+                    ? const BoxConstraints()
+                    : const BoxConstraints(maxHeight: 40),
+                child: Text(
+                  widget.caption,
+                  style: const TextStyle(fontSize: 15, color: Colors.white),
+                  maxLines: expanded ? null : 2,
+                  overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                ),
+              ),
             ),
             const SizedBox(height: 8),
             Text(

@@ -57,7 +57,7 @@ class _AddPostPageState extends State<AddPostPage> {
     if (personName.isEmpty || caption.isEmpty || _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please fill all fields and select an image"),
+          content: Text("fill everything dumbass"),
           backgroundColor: Colors.red,
         ),
       );
@@ -71,7 +71,7 @@ class _AddPostPageState extends State<AddPostPage> {
     if (fileSizeMB > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Image too large! Please select an image smaller than 10MB"),
+          content: Text("bro free tier database , upload under 10mb"),
           backgroundColor: Colors.red,
         ),
       );
@@ -107,7 +107,7 @@ class _AddPostPageState extends State<AddPostPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Failed to create post: ${e.toString()}"),
+            content: Text("Network bhai shit"),
             backgroundColor: Colors.red,
           ),
         );
