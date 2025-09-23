@@ -32,12 +32,12 @@ Future<void> checkLogin() async {
       context,
       MaterialPageRoute(builder: (_) => HomePage()),
     );
-  } else {
-    // User not logged in → Go to Login (or Terms)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginPage()),
-    );
+  // } else {
+  //   // User not logged in → Go to Login (or Terms)
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(builder: (_) => LoginPage()),
+  //   );
   }
 }
 

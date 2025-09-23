@@ -72,7 +72,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    Navigator.of(context).pushReplacementNamed('/onboard');
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   void _onTabChanged(int index) {
