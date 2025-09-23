@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ktea/MAINPAGE.dart';
 import 'package:ktea/home.dart';
 import 'package:ktea/register_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +31,7 @@ Future<void> checkLogin() async {
     // User is logged in → Go to Home
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => HomePage()),
+      MaterialPageRoute(builder: (_) => MAINPAGE()),
     );
   // } else {
   //   // User not logged in → Go to Login (or Terms)

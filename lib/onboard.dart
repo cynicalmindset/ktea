@@ -134,18 +134,8 @@ class _LoginPageState extends State<LoginPage> {
                                      await saveLoginData(userId, res['username']);
                                      print("_id type: ${res['_id'].runtimeType}");     // prints type of _id
                                      print("_id value: ${res['_id']}"); 
-                                    Navigator.pushReplacementNamed(context, "/home");
-
-
-
-
-
-
-
-
-
-                                    
-                                  } else {
+                                    Navigator.pushReplacementNamed(context, "/MAIN");
+                                    } else {
                                     // REGISTER FLOW
                                     final res = await ApiService.registerUser();
                                     print("✅ Register Success: $res");
@@ -195,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                                               onPressed: () {
                                                 Navigator.pop(context); // close dialog
                                                 Navigator.pushReplacementNamed(
-                                                    context, "/home");
+                                                    context, "/MAIN");
                                               },
                                               child: const Text("Continue"),
                                             ),

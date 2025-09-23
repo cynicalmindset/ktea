@@ -10,6 +10,9 @@ class Chatpage extends StatefulWidget {
 class _ChatpageState extends State<Chatpage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text("Chat coming soon",selectionColor: Colors.white,),),
+    );
   }
 }

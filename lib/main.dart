@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ktea/MAINPAGE.dart';
 import 'package:ktea/addpost.dart';
 import 'package:ktea/home.dart';
 import 'package:ktea/register_page.dart';
@@ -23,6 +24,7 @@ void main(){
       '/home':(context)=> HomePage(),
       '/Profile':(context)=> UserProfilePage(),
       '/Addpost':(context)=>AddPostPage(),
+      '/MAIN':(context)=>MAINPAGE(),
       
 
       //'/uploadpostpage':(context)=> UploadPostPage()

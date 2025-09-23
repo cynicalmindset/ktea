@@ -1,15 +1,14 @@
-// custom_toggle_appbar.dart
 import 'package:flutter/material.dart';
 
 class CustomToggleAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final Function(int)? onTabChanged;
   final int initialIndex;
+  final ValueChanged<int>? onTabChanged; // notify parent
   final VoidCallback? onSettingsPressed;
 
   const CustomToggleAppBar({
     super.key,
+    this.initialIndex = 0,
     this.onTabChanged,
-    this.initialIndex = 0, 
     this.onSettingsPressed,
   });
 
@@ -37,18 +36,19 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
 
   void _handleSwipe(DragEndDetails details) {
     const double sensitivity = 50.0;
-    
     if (details.primaryVelocity != null) {
-      // Swipe right (previous tab)
       if (details.primaryVelocity! > sensitivity && selectedIndex > 0) {
-        setState(() => selectedIndex--);
-        widget.onTabChanged?.call(selectedIndex);
+        _changeTab(selectedIndex - 1);
+      } else if (details.primaryVelocity! < -sensitivity && selectedIndex < tabs.length - 1) {
+        _changeTab(selectedIndex + 1);
       }
-      // Swipe left (next tab)
-      else if (details.primaryVelocity! < -sensitivity && selectedIndex < tabs.length - 1) {
-        setState(() => selectedIndex++);
-        widget.onTabChanged?.call(selectedIndex);
-      }
+    }
+  }
+
+  void _changeTab(int index) {
+    setState(() => selectedIndex = index);
+    if (widget.onTabChanged != null) {
+      widget.onTabChanged!(index); // notify parent
     }
   }
 
@@ -74,17 +74,9 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Stack(
           children: [
-            // Background slider
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.all(3),
@@ -96,7 +88,6 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
               ),
               transform: Matrix4.translationValues(selectedIndex * 80.0, 0, 0),
             ),
-            // Tab buttons
             Row(
               children: tabs.asMap().entries.map((entry) {
                 int index = entry.key;
@@ -113,11 +104,8 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
   Widget _buildTabButton(IconData icon, String label, int index) {
     bool isSelected = selectedIndex == index;
     return GestureDetector(
-      onTap: () {
-        setState(() => selectedIndex = index);
-        widget.onTabChanged?.call(index);
-      },
-      child: Container(
+      onTap: () => _changeTab(index),
+      child: SizedBox(
         width: 80,
         height: 46,
         child: Row(
@@ -152,12 +140,7 @@ class _CustomToggleAppBarState extends State<CustomToggleAppBar> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: IconButton(
-        onPressed: widget.onSettingsPressed ?? () {
-          // Handle settings action
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Settings pressed')),
-          );
-        },
+        onPressed: widget.onSettingsPressed,
         icon: const Icon(Icons.settings, color: Colors.black, size: 20),
       ),
     );

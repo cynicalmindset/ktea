@@ -6,8 +6,7 @@ import 'package:ktea/userpage.dart';
 import '../models/safe_post.dart';
 import '../widgets/expandable_info_box.dart';
 import '../widgets/expandable_comments.dart';
-import '../widgets/custom_toggle_appbar.dart';
-//import 'add_post_page.dart';
+//import '../widgets/custom_toggle_appbar.dart';
 
 /// 🔹 Home Page
 class HomePage extends StatefulWidget {
@@ -25,12 +24,6 @@ class _HomePageState extends State<HomePage> {
   bool isInitialized = false;
   int selectedTabIndex = 0; // Add this for tab management
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _initializeUser();
-  // }
-
   void _handleTabChange(int index) {
     setState(() {
       selectedTabIndex = index;
@@ -38,42 +31,19 @@ class _HomePageState extends State<HomePage> {
     // Handle different tab actions here
     switch (index) {
       case 0: // Home
-        // Already on home, maybe refresh posts
         _loadPosts();
         break;
-     case 1: // Profile
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) => const UserProfilePage(),
-    ),
-  );
-  break;
-
-      
-       // break;
+      case 1: // Profile
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const UserProfilePage(),
+          ),
+        );
+        break;
       case 2: // Chat
-        // Navigate to chat or show chat content
         print('Chat tab selected');
         break;
     }
-  }
-
-  void _handleSettingsPressed() {
-    // Handle settings button press
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[850],
-        title: const Text('Settings', style: TextStyle(color: Colors.white)),
-        content: const Text('Settings page coming soon!', style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Colors.blueAccent)),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -82,7 +52,6 @@ class _HomePageState extends State<HomePage> {
     _initializeUser();
   }
 
- 
   Future<void> _initializeUser() async {
     try {
       final response = await ApiService.registerUser();
@@ -162,11 +131,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: CustomToggleAppBar(
-        initialIndex: selectedTabIndex,
-        onTabChanged: _handleTabChange,
-        onSettingsPressed: _handleSettingsPressed,
-      ),
+      // 🔹 Removed AppBar
       floatingActionButton: selectedTabIndex == 0 ? FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -175,7 +140,6 @@ class _HomePageState extends State<HomePage> {
               builder: (context) => const AddPostPage(),
             ),
           );
-          // Refresh posts if a new post was created
           if (result == true) {
             _loadPosts();
           }
@@ -185,18 +149,18 @@ class _HomePageState extends State<HomePage> {
           Icons.add,
           color: Colors.black,
         ),
-      ) : null, // Only show FAB on Home tab
+      ) : null,
       body: _buildCurrentTabContent(),
     );
   }
 
   Widget _buildCurrentTabContent() {
     switch (selectedTabIndex) {
-      case 0: // Home tab
+      case 0: 
         return _buildHomeContent();
-      case 1: // Profile tab
+      case 1: 
         return _buildProfileContent();
-      case 2: // Chat tab
+      case 2: 
         return _buildChatContent();
       default:
         return _buildHomeContent();
@@ -331,4 +295,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  }
+}

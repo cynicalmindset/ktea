@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ktea/widgets/custom_toggle_appbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 
@@ -75,20 +74,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     Navigator.of(context).pushReplacementNamed('/');
   }
 
-  void _onTabChanged(int index) {
-    switch (index) {
-      case 0:
-        Navigator.of(context).pushReplacementNamed('/home');
-        break;
-      case 1:
-        // Already on profile
-        break;
-      case 2:
-        Navigator.of(context).pushNamed('/chat'); // replace with your chat route
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loadingUserData) {
@@ -100,11 +85,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: CustomToggleAppBar(
-        initialIndex: 1,
-        onTabChanged: _onTabChanged,
-        onSettingsPressed: _logout,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -156,7 +136,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator(color: Colors.white));
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
+                    return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(child: Text('No posts uploaded yet.', style: TextStyle(color: Colors.white)));
                   }
@@ -167,7 +147,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final post = posts[index];
-                      final photoUrl = post['photo']?['url'] ?? null;
+                      final photoUrl = post['photo']?['url'];
 
                       return Card(
                         color: Colors.grey[900],
